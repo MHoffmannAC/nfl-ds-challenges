@@ -12,11 +12,12 @@ def main():
         ],
         "Select topic": [
             st.Page("pages/pandas.py", title="Pandas", icon=":material/table_chart:"),
-            st.Page("pages/abtesting.py", title="A/B testing", icon=":material/compare_arrows:"),
+            st.Page("pages/abtesting.py", title="A/B-Testing", icon=":material/compare_arrows:"),
             st.Page("pages/sql.py", title="SQL", icon=":material/storage:"),
             st.Page("pages/etl.py", title="ETL", icon=":material/valve:"),
         ]
     })
+    
     
     page.run()
 
