@@ -2,6 +2,10 @@ import streamlit as st
 
 
 def main():
+    
+    with st.sidebar:
+        st.page_link("https://nfl-tools.streamlit.app/", label="NFL Gameday Analyzer", icon=":material/sports_football:")
+    
     st.set_page_config(layout="wide")
     st.set_option('client.showErrorDetails', False)
 
