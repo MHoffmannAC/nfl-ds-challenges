@@ -8,3 +8,5 @@ st.page_link("pages/pandas.py", label=bulletpoint+"**Pandas**: Tasks to practice
 st.page_link("pages/abtesting.py",label=bulletpoint+"**A/B-Testing**: Tasks to practice A/B testing concepts and statistical analysis.")
 st.page_link("pages/sql.py",label=bulletpoint+"**SQL**: Tasks to practice SQL queries and database management utilizing mySQL.")
 st.page_link("pages/etl.py",label=bulletpoint+"**ETL**: Tasks to practice the ETL process, including data extraction, transformation, and loading.")
+
+st.warning("If you enjoy the mix of NFL and Data Science, consider checking out my other project: [NFL Gameday Analyzer](https://nfl-tools.streamlit.app/). It provides a comprehensive analysis of NFL games, including play-by-play data, team statistics, and more. It's a great way to combine your passion for the NFL with your data science skills!")
