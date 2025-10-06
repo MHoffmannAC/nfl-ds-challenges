@@ -95,6 +95,7 @@ st.title("SQL Tasks")
 SQL_FILES_SUBDIRECTORY = "exercises/sql/solutions"
 SQL_CHALLENGES_SUBDIRECTORY = "exercises/sql/challenges"
 sql_files = [f for f in os.listdir(SQL_FILES_SUBDIRECTORY) if f.endswith('.sql')]
+sql_files.sort()
 
 processed_file_options = []
 file_name_map = {}
