@@ -9,4 +9,4 @@ st.page_link("pages/abtesting.py",label=bulletpoint+"**A/B-Testing**: Tasks to p
 st.page_link("pages/sql.py",label=bulletpoint+"**SQL**: Tasks to practice SQL queries and database management utilizing mySQL.")
 st.page_link("pages/etl.py",label=bulletpoint+"**ETL**: Tasks to practice the ETL process, including data extraction, transformation, and loading.")
 
-st.error("If you enjoy the mix of NFL and Data Science, consider checking out my other project: [NFL Gameday Analyzer](https://nfl-tools.streamlit.app/). It contains a bunch of Data Science approaches based on NFL data, including models to predict game outcomes or the next play type and you can even let an AI guess which logo you are drawing. It's a fun way to see Data Science in action with NFL data!" )
+st.error("If you enjoy the mix of NFL and Data Science, consider checking out my other project: [NFL Gameday Analyzer](https://nfl-gameday.streamlit.app/). It contains a bunch of Data Science approaches based on NFL data, including models to predict game outcomes or the next play type and you can even let an AI guess which logo you are drawing. It's a fun way to see Data Science in action with NFL data!" )
