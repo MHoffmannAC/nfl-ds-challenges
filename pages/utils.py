@@ -1,6 +1,116 @@
 import streamlit as st
 import json
 import re
+import os
+
+def parse_sql_content(content):
+    """
+    Parses SQL content to extract tasks (comments) and their corresponding code blocks.
+    Handles multi-line comments for task descriptions, treating them as a single task
+    and preserving newlines between comment lines for the toggle text.
+    Ignores lines starting with 'USE' and initial blank lines.
+    Escapes periods in numbered task comments to prevent Markdown list parsing.
+    """
+    lines = content.splitlines()
+    tasks = []
+    current_task_comment_lines = []
+    current_code_block_lines = []
+
+    # Flag to indicate if we are currently collecting comment lines for a task.
+    collecting_comments = False
+
+    for line in lines:
+        stripped_line = line.strip()
+
+        if stripped_line.startswith('USE '):
+            # Ignore USE statements and reset any pending task.
+            if current_task_comment_lines or current_code_block_lines:
+                tasks.append({
+                    'comment': '\n'.join(current_task_comment_lines).strip(),
+                    'code': '\n'.join(current_code_block_lines).strip()
+                })
+            current_task_comment_lines = []
+            current_code_block_lines = []
+            collecting_comments = False
+            continue
+
+        elif stripped_line.startswith('--'):
+            # If we were NOT already collecting comments, and there's a pending task,
+            # it means this new comment starts a new task.
+            if not collecting_comments and (current_task_comment_lines or current_code_block_lines):
+                tasks.append({
+                    'comment': '\n'.join(current_task_comment_lines).strip(),
+                    'code': '\n'.join(current_code_block_lines).strip()
+                })
+                current_task_comment_lines = []
+                current_code_block_lines = []
+
+            # Extract the raw comment text (without '--' and leading/trailing spaces)
+            comment_text = stripped_line.replace('--', '').strip()
+
+            # Escape the period if the comment starts with a number followed by a period and space
+            # This prevents Streamlit's Markdown from interpreting it as a list item
+            if re.match(r'^\d+\.\s', comment_text):
+                # Replace the first occurrence of ". " with "\. "
+                # The '\s' in the replacement string was causing the error.
+                # It should be a literal space.
+                comment_text = re.sub(r'(\d+)\.\s', r'\1\\. ', comment_text, 1)
+
+            # Add the processed comment line to the current task's comment lines.
+            current_task_comment_lines.append(comment_text)
+            collecting_comments = True
+        elif not stripped_line: # Empty line
+            # Ignore leading blank lines before any content or immediately after a USE statement.
+            if not current_task_comment_lines and not current_code_block_lines:
+                continue
+            # If we hit a blank line while collecting comments, it signifies the end of the
+            # multi-line comment block and the start of the code block.
+            elif collecting_comments:
+                collecting_comments = False
+                current_code_block_lines.append(line) # Add the blank line to the code block for formatting.
+            # If not collecting comments, and not initial, it's a blank line within a code block.
+            else:
+                current_code_block_lines.append(line)
+        else: # Non-empty, non-comment, non-USE line (must be code)
+            # If we were collecting comments, and now hit a non-empty line, it means
+            # the comment block is over and we are now in the code block.
+            if collecting_comments:
+                collecting_comments = False
+            current_code_block_lines.append(line)
+
+    # After the loop, add the last task if any content was collected.
+    if current_task_comment_lines or current_code_block_lines:
+        tasks.append({
+            'comment': '\n'.join(current_task_comment_lines).strip(),
+            'code': '\n'.join(current_code_block_lines).strip()
+        })
+    return tasks
+
+def select_file(path):
+    ABtest_files = [f for f in os.listdir(path)]
+
+    processed_file_options = []
+    file_name_map = {}
+    for fname in ABtest_files:
+        name_without_extension = os.path.splitext(fname)[0]
+        processed_name = name_without_extension.replace("_", " ").replace("solutions", "").title()
+        processed_file_options.append(processed_name)
+        file_name_map[processed_name] = fname
+    if not processed_file_options:
+        st.warning(f"No files found in the '{path}' directory. Please ensure files are present.")
+        selected_file_display_name = None
+    elif len(processed_file_options) == 1:
+        selected_file_display_name = processed_file_options[0]
+    else:
+        selected_file_display_name = st.segmented_control(
+            "Choose a file:",
+            options=processed_file_options,
+            default=None
+        )
+                
+    selected_actual_file_name = file_name_map.get(selected_file_display_name)
+    return selected_actual_file_name, selected_file_display_name
+
 
 def display_ipynb_content(ipynb_content):
     """
