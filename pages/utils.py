@@ -87,11 +87,12 @@ def parse_sql_content(content):
     return tasks
 
 def select_file(path):
-    ABtest_files = [f for f in os.listdir(path)]
+    files = [f for f in os.listdir(path)]
+    files.sort()
 
     processed_file_options = []
     file_name_map = {}
-    for fname in ABtest_files:
+    for fname in files:
         name_without_extension = os.path.splitext(fname)[0]
         processed_name = name_without_extension.replace("_", " ").replace("solutions", "").title()
         processed_file_options.append(processed_name)
