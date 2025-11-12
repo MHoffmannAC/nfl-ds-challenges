@@ -10,6 +10,14 @@ st.title("SQL Tasks")
 SQL_FILES_SUBDIRECTORY = "exercises/sql/solutions"
 SQL_CHALLENGES_SUBDIRECTORY = "exercises/sql/challenges"
 
+st.write("To practice SQL tasks, download the SQL dump file below and import it into your local database. Then, select a task file to view the challenges and solutions.")
+st.download_button(
+    label="Download SQL dump",
+    data=open("exercises/sql/data/espn_small_dump.sql", "rb").read(),
+    file_name="espn_small_dump.sql",
+    mime="application/sql"
+)
+
 selected_actual_file_name, selected_file_display_name = select_file(SQL_FILES_SUBDIRECTORY)
 
 if selected_actual_file_name:
@@ -31,13 +39,6 @@ if selected_actual_file_name:
             label="Download solutions file",
             data=open(solution_path, "rb").read(),
             file_name=selected_actual_file_name,
-            mime="application/sql"
-        )
-    with cols[2]:
-        st.download_button(
-            label="Download SQL dump",
-            data=open("exercises/sql/data/espn_small_dump.sql", "rb").read(),
-            file_name="espn_small_dump.sql",
             mime="application/sql"
         )
 
