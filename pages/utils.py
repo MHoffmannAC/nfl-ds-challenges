@@ -16,18 +16,16 @@ def parse_sql_content(content):
     current_task_comment_lines = []
     current_code_block_lines = []
 
-    # Flag to indicate if we are currently collecting comment lines for a task.
     collecting_comments = False
 
     for line in lines:
         stripped_line = line.strip()
 
         if stripped_line.startswith('USE '):
-            # Ignore USE statements and reset any pending task.
             if current_task_comment_lines or current_code_block_lines:
                 tasks.append({
-                    'comment': '\n'.join(current_task_comment_lines).strip(),
-                    'code': '\n'.join(current_code_block_lines).strip()
+                    'comment': '  \n'.join(current_task_comment_lines).strip(),
+                    'code': '  \n'.join(current_code_block_lines).strip()
                 })
             current_task_comment_lines = []
             current_code_block_lines = []
@@ -35,54 +33,41 @@ def parse_sql_content(content):
             continue
 
         elif stripped_line.startswith('--'):
-            # If we were NOT already collecting comments, and there's a pending task,
-            # it means this new comment starts a new task.
             if not collecting_comments and (current_task_comment_lines or current_code_block_lines):
                 tasks.append({
-                    'comment': '\n'.join(current_task_comment_lines).strip(),
-                    'code': '\n'.join(current_code_block_lines).strip()
+                    'comment': '  \n'.join(current_task_comment_lines).strip(),
+                    'code': '  \n'.join(current_code_block_lines).strip()
                 })
                 current_task_comment_lines = []
                 current_code_block_lines = []
 
-            # Extract the raw comment text (without '--' and leading/trailing spaces)
             comment_text = stripped_line.replace('--', '').strip()
 
             # Escape the period if the comment starts with a number followed by a period and space
             # This prevents Streamlit's Markdown from interpreting it as a list item
             if re.match(r'^\d+\.\s', comment_text):
-                # Replace the first occurrence of ". " with "\. "
-                # The '\s' in the replacement string was causing the error.
-                # It should be a literal space.
                 comment_text = re.sub(r'(\d+)\.\s', r'\1\\. ', comment_text, 1)
 
-            # Add the processed comment line to the current task's comment lines.
             current_task_comment_lines.append(comment_text)
             collecting_comments = True
-        elif not stripped_line: # Empty line
-            # Ignore leading blank lines before any content or immediately after a USE statement.
+        elif not stripped_line:
             if not current_task_comment_lines and not current_code_block_lines:
                 continue
-            # If we hit a blank line while collecting comments, it signifies the end of the
-            # multi-line comment block and the start of the code block.
+
             elif collecting_comments:
                 collecting_comments = False
-                current_code_block_lines.append(line) # Add the blank line to the code block for formatting.
-            # If not collecting comments, and not initial, it's a blank line within a code block.
+                current_code_block_lines.append(line) 
             else:
                 current_code_block_lines.append(line)
-        else: # Non-empty, non-comment, non-USE line (must be code)
-            # If we were collecting comments, and now hit a non-empty line, it means
-            # the comment block is over and we are now in the code block.
+        else:
             if collecting_comments:
                 collecting_comments = False
             current_code_block_lines.append(line)
 
-    # After the loop, add the last task if any content was collected.
     if current_task_comment_lines or current_code_block_lines:
         tasks.append({
-            'comment': '\n'.join(current_task_comment_lines).strip(),
-            'code': '\n'.join(current_code_block_lines).strip()
+            'comment': '  \n'.join(current_task_comment_lines).strip(),
+            'code': '  \n'.join(current_code_block_lines).strip()
         })
     return tasks
 
@@ -176,34 +161,26 @@ def display_ipynb_content(ipynb_content):
                 is_next_cell_solution_code = False # Reset flag
 
         elif cell['cell_type'] == 'code':
-            # Join code source lines into a single string
             code_source = "".join(cell['source'])
             
-            # Clean the code source: remove comments and strip whitespace
-            # This step is crucial for determining if the cell is 'empty' of meaningful code
-            temp_cleaned_code = re.sub(r'#.*', '', code_source) # Remove single-line comments
-            temp_cleaned_code = re.sub(r'\"\"\"[\s\S]*?\"\"\"', '', temp_cleaned_code) # Remove triple-double-quote comments
-            temp_cleaned_code = re.sub(r"\'\'\'[\s\S]*?\'\'\'", '', temp_cleaned_code) # Remove triple-single-quote comments
+            temp_cleaned_code = re.sub(r'#.*', '', code_source)
+            temp_cleaned_code = re.sub(r'\"\"\"[\s\S]*?\"\"\"', '', temp_cleaned_code)
+            temp_cleaned_code = re.sub(r"\'\'\'[\s\S]*?\'\'\'", '', temp_cleaned_code)
             cleaned_code_for_check = temp_cleaned_code.strip()
             
-            # Define common placeholder texts to filter out (exact matches after cleaning)
             placeholder_exact_matches = [
                 "no python code needed here for manual setup. execute sql in your mysql client.",
                 "place your code here",
                 "pass"
             ]
             
-            # Check if the cleaned code is empty or matches an exact placeholder text
             is_placeholder = not cleaned_code_for_check or cleaned_code_for_check.lower() in placeholder_exact_matches
 
-            if is_next_cell_solution_code: # If the previous markdown said this is a solution
-                # Display it as a solution, regardless of whether it looks like a placeholder
+            if is_next_cell_solution_code:
                 with st.expander("Solution"):
                     st.code(code_source, language='python')
-                st.divider() # Add a divider after the solution
-                is_next_cell_solution_code = False # Reset after displaying the solution
-            elif not is_placeholder: # If it's not a solution, but it's also not a placeholder
+                st.divider()
+                is_next_cell_solution_code = False
+            elif not is_placeholder:
                 st.code(code_source, language='python')
-                is_next_cell_solution_code = False # Reset (should already be False, but for safety)
-            # If it's a placeholder AND not a solution (i.e., the first #Place your code here), then skip it.
-            # is_next_cell_solution_code remains False in this case.
+                is_next_cell_solution_code = False
