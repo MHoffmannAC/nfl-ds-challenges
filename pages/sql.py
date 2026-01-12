@@ -10,6 +10,10 @@ st.title("SQL Tasks")
 SQL_FILES_SUBDIRECTORY = "exercises/sql/solutions"
 SQL_CHALLENGES_SUBDIRECTORY = "exercises/sql/challenges"
 
+st.subheader("Overview")
+st.write("""These examples utilize a small subset of the NFL database used in the [NFL Gameday Analyzer](https://nfl-gameday.streamlit.app/) app which allows to provide practical SQL challenges.
+         """)
+st.subheader("Instructions")
 st.write("To practice SQL tasks, download the SQL dump file below and import it into your local database. Then, select a task file to view the challenges and solutions.")
 st.download_button(
     label="Download SQL dump",
